@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Trophy, Users, BarChart3, Globe, ArrowRight } from 'lucide-react';
+import { Trophy, Users, ChartBar as BarChart3, Globe, ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   return (

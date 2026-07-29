@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayoutDashboard, Users, Trophy, BarChart3, Globe, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Trophy, ChartBar as BarChart3, Globe, Settings, LogOut } from 'lucide-react';
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
   return (
