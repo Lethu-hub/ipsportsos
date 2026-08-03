@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Users, ChartBar as BarChart3, Globe, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { ClubCard } from '@/components/public/club-card';
 
@@ -127,26 +127,6 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {/* Feature grid */}
-      <section className="border-t border-border/60 bg-card/50">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-          <div className="grid gap-6 md:grid-cols-3">
-            <FeatureCard icon={<Globe className="h-6 w-6" />} title="Public Portal" description="Fans discover clubs, fixtures, results, and player cards in a clean, fast interface." />
-            <FeatureCard icon={<Users className="h-6 w-6" />} title="Club Portal" description="Staff manage squads, matches, and website content with a draft-to-publish workflow." />
-            <FeatureCard icon={<BarChart3 className="h-6 w-6" />} title="Analytics Engine" description="Reusable widgets and role-aware dashboards turn match data into actionable insight." />
-          </div>
-        </div>
-      </section>
     </main>
-  );
-}
-
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
-  return (
-    <div className="rounded-lg border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">{icon}</div>
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-    </div>
   );
 }

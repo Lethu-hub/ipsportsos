@@ -1,10 +1,7 @@
 import { redirect } from 'next/navigation';
-import { PortalShell } from '@/components/shells/portal-shell';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, isPlatformAdmin, primaryOrgMembership } from '@/lib/auth';
 
-export const metadata = {
-  title: 'Club Portal — IP Sports OS',
-};
+export const dynamic = 'force-dynamic';
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   const session = await getSessionUser();
@@ -13,19 +10,17 @@ export default async function PortalLayout({ children }: { children: React.React
     redirect('/login');
   }
 
-  const profile = session.profile;
-  const name =
-    [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') ||
-    session.email.split('@')[0] ||
-    'Portal user';
+  // Redirect to Platform Admin if they are a platform admin
+  if (isPlatformAdmin(session.access)) {
+    redirect('/admin');
+  }
 
-  return (
-    <PortalShell
-      userName={name}
-      userEmail={session.email}
-      access={session.access}
-    >
-      {children}
-    </PortalShell>
-  );
+  // Redirect to the club staff portal if they have a club membership
+  const org = primaryOrgMembership(session.access);
+  if (org && org.organization_slug) {
+    redirect(`/${org.organization_slug}`);
+  }
+
+  // Fallback
+  return <>{children}</>;
 }
