@@ -85,4 +85,51 @@
   h1, h2, h3, h4 {
     @apply tracking-tight;
   }
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+  }
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Design system motion tokens (visual.md §19 — keep durations 150–250 ms) */
+@keyframes ipfade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ipslide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ipscale-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ipskeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-fade-in {
+  animation: ipfade-in 0.2s ease-out both;
+}
+
+.animate-slide-up {
+  animation: ipslide-up 0.2s ease-out both;
+}
+
+.animate-scale-in {
+  animation: ipscale-in 0.15s ease-out both;
+}
+
+/* Skeleton loader (visual.md §17 — skeletons, not spinners) */
+.skeleton-shimmer {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--secondary)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: ipskeleton 1.6s linear infinite;
 }
