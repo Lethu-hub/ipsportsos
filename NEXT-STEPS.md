@@ -2,8 +2,8 @@
 
 ## Immediate (to go live)
 
-1. **Merge PR #1** (`arena/019fc990-ipsportsos` → `main`) so Vercel deploys the fixes + Sprint 1 build.
-2. **Apply migrations** to Supabase project `ccqruhgsoxcilekpayhr`:
+1. **Merge the current Sprint 1 branch/PR** into `main` so Vercel deploys the completed platform build.
+2. **Apply all migrations** to Supabase project `ccqruhgsoxcilekpayhr`:
    ```bash
    npx supabase link --project-ref ccqruhgsoxcilekpayhr
    npx supabase db push
@@ -19,9 +19,11 @@
 ## Sprint 1 demo script
 
 1. Log in as `owner@ipsportsos.app` → Platform Admin → create a sport/league/club (seeded data already exists).
-2. Create a staff user (e.g. coach@club.com, role COACH, org = a club) — password chosen at creation.
-3. Sign in as the staff user → Squad → create a team, add athletes, toggle **Publish**.
-4. Open the public club page (`/clubs/<club-slug>`) and see the roster with player cards.
+2. Open **Subscriptions & access**, assign a plan, and enable the features needed by the club.
+3. Create a staff user (e.g. coach@club.com, role COACH, org = a club) — password chosen at creation.
+4. Sign in as the staff user → Squad → create a team, add athletes, toggle **Publish**.
+5. Open the public club page (`/clubs/<club-slug>`) and see the roster with player cards.
+6. Return to **Audit log** and verify the organization, membership, team, and athlete changes.
 
 ## Sprint 2 (next)
 

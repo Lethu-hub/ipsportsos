@@ -9,8 +9,10 @@ import {
   Building2,
   UserCog,
   ChartBar as BarChart3,
+  CreditCard,
   Globe,
   LogOut,
+  ScrollText,
   Menu,
   X,
 } from 'lucide-react';
@@ -50,6 +52,16 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
     href: '/admin/users',
     label: 'Users & Roles',
     icon: <UserCog className="h-4 w-4" />,
+  },
+  {
+    href: '/admin/subscriptions',
+    label: 'Subscriptions',
+    icon: <CreditCard className="h-4 w-4" />,
+  },
+  {
+    href: '/admin/audit',
+    label: 'Audit log',
+    icon: <ScrollText className="h-4 w-4" />,
   },
   {
     href: '/admin/analytics',

@@ -48,12 +48,14 @@ Seeds (idempotent):
 - `0016` — platform owner (`owner@ipsportsos.app`) — **password is random**; reset it via Supabase → Authentication → Users → Reset password
 - `0017` — demo platform: Football, Botswana Premier League, 2026 Season, three clubs with branding, subscription plans, club sections
 
-## Sprint 1 (current)
+## Sprint 1 (complete)
 
 - Public shell + portal shell (role-aware sidebar)
 - Email/password auth; server-side role & permission checks
 - Platform admin: sports, organizations, users & roles
+- Subscription plans and feature entitlement management
+- Append-only audit log with automatic core mutation tracking
 - Squad manager: teams, athletes, visibility/publishing
 - Public club pages with roster, fixtures, news
 
-See `PROJECT_STATUS.md`, `CHANGELOG.md`, `NEXT-STEPS.md`.
+See `PROJECT_STATUS.md`, `CHANGELOG.md`, `NEXT-STEPS.md` for deployment prerequisites and the demo flow.
