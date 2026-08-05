@@ -2,12 +2,12 @@
 
 _Updated: 2026-08-03_
 
-## Sprint 1 — In progress (core complete)
+## Sprint 1 — complete
 
 ### ✅ Done
 
 **Database (Prompt 2)**
-- 18 migrations in `supabase/migrations/` in dependency order:
+- 20 migrations in `supabase/migrations/` in dependency order:
   sports → organizations (+branding) → teams → roles/permissions → profiles → memberships → competitions/seasons → athletes (+history/visibility/statistics) → matches/events → website system → subscriptions → analytics → audit logs
 - RLS enabled on every table with tenant-scoped policies (helper functions:
   `current_profile_id`, `is_platform_admin`, `is_org_member`, `has_permission`, `can`, `is_athlete_public`)
@@ -26,24 +26,29 @@ _Updated: 2026-08-03_
 
 **Sprint 1 demo flow (Prompt 4)**
 - Platform admin: create sports, organizations (clubs/leagues), staff users (with roles)
+- Platform admin: assign subscription plans, configure feature entitlements, and review the audit log
 - Squad manager: create teams, add athletes, publish athletes via visibility toggles
 - Public: home (featured clubs/fixtures), club directory, club page (branding banner, teams,
   squad roster with player cards, fixtures & results, news), fixtures, results, news pages
+- Automatic append-only audit events for core platform and tenant mutations
 - Seeded league: Botswana Premier League — Matebele FC, Township Rollers, Gaborone United
 
-### 🔧 Fixes shipped earlier
+### 🔧 Reliability and governance shipped
 
 - `500 MIDDLEWARE_INVOCATION_FAILED` — middleware no longer crashes when Supabase env vars are missing
+- Missing or invalid Supabase configuration now renders an actionable `/setup` page instead of a generic Vercel 500
 - `.next` build artifacts removed from git; `.gitignore` added
+- Audit writes are restricted to authenticated users and automatic audit triggers cover core mutations
 
-## Blocked / needs action
+## Operational prerequisites
 
-- **Apply migrations to the live Supabase project** (`npx supabase link` + `db push`, or SQL editor)
-- **Set env vars in Vercel** (see README)
+These are deployment tasks rather than code blockers:
+
+- **Apply all migrations to the live Supabase project** (`npx supabase link` + `db push`, or SQL editor)
+- **Set env vars in Vercel** for Production and Preview (see README), then redeploy
 - **Reset the platform owner password** (`owner@ipsportsos.app`) via Supabase dashboard
+- Run the Sprint 1 demo flow end-to-end against the configured project
 
 ## Next
 
-- Merge PR #1 (middleware fix + .gitignore) into `main` to deploy
-- Apply migrations + env vars; run the Sprint 1 demo flow end-to-end
-- Sprint 2: match management, website manager (draft→publish), analytics engine
+Sprint 2 can start with match management, website publishing, and analytics widgets. The Sprint 1 platform foundation and acceptance flow are complete.

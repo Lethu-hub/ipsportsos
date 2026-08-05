@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, Building2, UserCog, ChartBar as BarChart3 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Building2, UserCog, ChartBar as BarChart3, CreditCard, ScrollText } from 'lucide-react';
 import { requirePlatformAdmin } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { PageHeader } from '@/components/ui/page-header';
@@ -22,6 +22,8 @@ export default async function AdminDashboardPage() {
     { href: '/admin/sports', label: 'Manage Sports', description: 'Add and configure supported sports.', icon: <ShieldCheck className="h-5 w-5 text-primary" /> },
     { href: '/admin/organizations', label: 'Manage Organizations', description: 'Add clubs, leagues, and subscriptions.', icon: <Building2 className="h-5 w-5 text-primary" /> },
     { href: '/admin/users', label: 'Manage Users & Admins', description: 'Add other OS admins and staff.', icon: <UserCog className="h-5 w-5 text-primary" /> },
+    { href: '/admin/subscriptions', label: 'Subscriptions & Access', description: 'Assign plans and configure feature entitlements.', icon: <CreditCard className="h-5 w-5 text-primary" /> },
+    { href: '/admin/audit', label: 'Audit Log', description: 'Review important platform and organization changes.', icon: <ScrollText className="h-5 w-5 text-primary" /> },
     { href: '/admin/analytics', label: 'Analytics Engine', description: 'View system health and subscription analytics.', icon: <BarChart3 className="h-5 w-5 text-primary" /> },
   ];
 

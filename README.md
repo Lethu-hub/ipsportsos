@@ -26,6 +26,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<sb_publishable_... or anon key>
 ```
 
+### Vercel deployment
+
+Add both variables in **Vercel → Project Settings → Environment Variables** for every environment you use (Production and Preview), then redeploy. A deployment that is missing either variable will show the built-in setup screen at `/setup` instead of being able to query Supabase. The variables are read at build time for the browser bundle, so changing them requires a new deployment.
+
 ## Database migrations
 
 Migrations live in `supabase/migrations/` (numbered, RLS enabled on every table).
@@ -44,12 +48,14 @@ Seeds (idempotent):
 - `0016` — platform owner (`owner@ipsportsos.app`) — **password is random**; reset it via Supabase → Authentication → Users → Reset password
 - `0017` — demo platform: Football, Botswana Premier League, 2026 Season, three clubs with branding, subscription plans, club sections
 
-## Sprint 1 (current)
+## Sprint 1 (complete)
 
 - Public shell + portal shell (role-aware sidebar)
 - Email/password auth; server-side role & permission checks
 - Platform admin: sports, organizations, users & roles
+- Subscription plans and feature entitlement management
+- Append-only audit log with automatic core mutation tracking
 - Squad manager: teams, athletes, visibility/publishing
 - Public club pages with roster, fixtures, news
 
-See `PROJECT_STATUS.md`, `CHANGELOG.md`, `NEXT-STEPS.md`.
+See `PROJECT_STATUS.md`, `CHANGELOG.md`, `NEXT-STEPS.md` for deployment prerequisites and the demo flow.

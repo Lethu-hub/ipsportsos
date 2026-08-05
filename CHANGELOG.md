@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-05 — Sprint 1 completion
+
+### Added
+- Platform admin subscription workspace for assigning plans and configuring feature entitlements.
+- Read-only platform audit log page with actor, organization, entity, and metadata context.
+- Migration `0020` hardens `log_action` and adds automatic append-only audit triggers for core platform and tenant mutations.
+- Missing Supabase configuration now renders the actionable `/setup` page instead of a generic server exception.
+
+### Changed
+- Sprint 1 status and demo checklist now include subscriptions, entitlements, and audit verification.
+
 ## 2026-08-03 — Sprint 1 (core)
 
 ### Added
