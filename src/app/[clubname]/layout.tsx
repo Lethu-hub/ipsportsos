@@ -83,8 +83,10 @@ export default async function ClubLayout({ params, children }: ClubLayoutProps) 
     session.email.split('@')[0] ||
     'Staff User';
 
+  const membership = session.access.find((m) => m.organization_id === org.id);
+  const permissions = isPlatformAdmin(session.access) ? ['teams:create', 'matches:create', 'website:update', 'analytics:read', 'analytics:update'] : membership?.permissions ?? [];
   return (
-    <ClubPortalShell club={org} userName={name} userEmail={session.email}>
+    <ClubPortalShell club={org} userName={name} userEmail={session.email} permissions={permissions}>
       {children}
     </ClubPortalShell>
   );

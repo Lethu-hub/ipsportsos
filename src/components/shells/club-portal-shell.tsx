@@ -9,6 +9,7 @@ import {
   Trophy,
   Globe,
   Settings,
+  ChartBar as BarChart3,
   LogOut,
   Menu,
   X,
@@ -28,6 +29,7 @@ interface ClubPortalShellProps {
   };
   userName: string;
   userEmail: string;
+  permissions: string[];
   children: React.ReactNode;
 }
 
@@ -71,7 +73,7 @@ function SignOutButton() {
   );
 }
 
-export function ClubPortalShell({ club, userName, userEmail, children }: ClubPortalShellProps) {
+export function ClubPortalShell({ club, userName, userEmail, permissions, children }: ClubPortalShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -93,6 +95,7 @@ export function ClubPortalShell({ club, userName, userEmail, children }: ClubPor
       label: 'Matches',
       icon: <Trophy className="h-4 w-4" />,
     },
+    ...(permissions.includes('analytics:read') ? [{ href: `${prefix}/analytics`, label: 'Analytics', icon: <BarChart3 className="h-4 w-4" /> }] : []),
     {
       href: `${prefix}/website`,
       label: 'Website',
