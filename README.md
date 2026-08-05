@@ -26,6 +26,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<sb_publishable_... or anon key>
 ```
 
+### Vercel deployment
+
+Add both variables in **Vercel → Project Settings → Environment Variables** for every environment you use (Production and Preview), then redeploy. A deployment that is missing either variable will show the built-in setup screen at `/setup` instead of being able to query Supabase. The variables are read at build time for the browser bundle, so changing them requires a new deployment.
+
 ## Database migrations
 
 Migrations live in `supabase/migrations/` (numbered, RLS enabled on every table).

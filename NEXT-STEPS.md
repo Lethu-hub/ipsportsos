@@ -9,9 +9,11 @@
    npx supabase db push
    ```
    (or paste each file in `supabase/migrations/` into the dashboard SQL editor, in order)
-3. **Set Vercel env vars** (Project → Settings → Environment Variables):
+3. **Set Vercel env vars** (Project → Settings → Environment Variables) for both **Production** and **Preview**, then redeploy:
    - `NEXT_PUBLIC_SUPABASE_URL=https://ccqruhgsoxcilekpayhr.supabase.co`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_kwlL4zUWmDFm0GH9XeR8fw_zYeF2Rc6`
+
+   If either variable is missing, the app now shows `/setup` with these instructions instead of the generic Vercel server error.
 4. **Reset platform owner password** — Supabase → Authentication → Users → `owner@ipsportsos.app` → Reset password.
 
 ## Sprint 1 demo script
