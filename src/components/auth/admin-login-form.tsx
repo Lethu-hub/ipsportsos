@@ -75,7 +75,7 @@ export function AdminLoginForm() {
                 id="admin-identifier"
                 type="text"
                 autoComplete="username"
-                placeholder="mpofu9898 or mpofu9898@gmail.com"
+                placeholder="user or user226@xyz.com"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}

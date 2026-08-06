@@ -86,7 +86,7 @@ export function UserForm({ organizations, roles }: UserFormProps) {
           <Input
             id="user-email"
             type="email"
-            placeholder="coach@club.com"
+            placeholder="user226@xyz.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -97,7 +97,7 @@ export function UserForm({ organizations, roles }: UserFormProps) {
           <Input
             id="user-username"
             type="text"
-            placeholder="e.g. coach_molefe"
+            placeholder="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -136,11 +136,11 @@ export function UserForm({ organizations, roles }: UserFormProps) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="user-first">First name</Label>
-          <Input id="user-first" placeholder="Thabo" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          <Input id="user-first" placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="user-last">Last name</Label>
-          <Input id="user-last" placeholder="Molefe" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+          <Input id="user-last" placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
         </div>
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="user-org">Organization</Label>

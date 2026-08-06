@@ -20,8 +20,8 @@ export async function resolveIdentifierToEmail(
   }
 
   // Built-in fallback for admin username
-  if (trimmed.toLowerCase() === 'mpofu9898') {
-    return 'mpofu9898@gmail.com';
+  if (trimmed.toLowerCase() === 'admin') {
+    return 'admin@ipsportsos.local';
   }
 
   return trimmed;

@@ -80,7 +80,7 @@ export function LoginForm() {
                 id="login-identifier"
                 type="text"
                 autoComplete="username"
-                placeholder="mpofu9898 or coach@club.com"
+                placeholder="user or user226@xyz.com"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}

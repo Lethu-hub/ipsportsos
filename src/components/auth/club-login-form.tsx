@@ -91,7 +91,7 @@ export function ClubLoginForm({ club }: ClubLoginFormProps) {
                 id="club-identifier"
                 type="text"
                 autoComplete="username"
-                placeholder="you@club.com or username"
+                placeholder="user or user226@xyz.com"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
