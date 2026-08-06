@@ -70,7 +70,7 @@ export function OrganizationForm({ sports }: OrganizationFormProps) {
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="org-name">Name</Label>
-          <Input id="org-name" placeholder="Matebele FC" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input id="org-name" placeholder="Example Sports Club" value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="org-slug">URL slug (optional)</Label>

@@ -1,54 +1,40 @@
 # Project Status
 
-_Updated: 2026-08-03_
+_Updated: 2026-08-06_
 
-## Sprint 1 — complete
+## Tenant-testing readiness — in progress
 
-### ✅ Done
+### ✅ Delivered
 
-**Database (Prompt 2)**
-- 20 migrations in `supabase/migrations/` in dependency order:
-  sports → organizations (+branding) → teams → roles/permissions → profiles → memberships → competitions/seasons → athletes (+history/visibility/statistics) → matches/events → website system → subscriptions → analytics → audit logs
-- RLS enabled on every table with tenant-scoped policies (helper functions:
-  `current_profile_id`, `is_platform_admin`, `is_org_member`, `has_permission`, `can`, `is_athlete_public`)
-- App RPC functions: `create_staff_user` (secure user creation without service-role keys), `get_my_access`, `log_action`
-- Seeds: roles + permissions + role→permission mapping; platform owner; demo league + 3 clubs
-- All migrations verified against PostgreSQL's real parser (libpg_query 17.7.4)
+**Data model and tenancy**
+- 20 Supabase migrations cover organisations/branding, teams, roles/permissions, profiles/memberships, competitions/seasons, athletes, matches, website content, subscriptions, analytics, and append-only audit logging.
+- RLS is enabled across tenant tables with organization-scoped helper functions and platform-admin access checks.
+- The tenant dependency map and safe cleanup transaction are documented in [`docs/tenant-testing-cleanup.md`](docs/tenant-testing-cleanup.md).
+- Cleanup explicitly preserves shared sports, roles, plans, analytics definitions, other tenants, `profiles`, and `auth.users`.
 
-**Auth + roles + design system (Prompt 3)**
-- Email/password login (`/login`) with Supabase Auth; middleware env-guard (no more 500s)
-- Server-side access helpers (`lib/auth.ts`): `requireUser`, `requirePlatformAdmin`, `hasPermission`, `getSessionUser`
-- Role-aware portal shell (sidebar shows Platform Admin section only to platform roles)
-- Design system from `visual.md`: tokens (colors/radius/shadows/motion), UI primitives
-  (Button, Card, Input, Select, Badge, Avatar, Skeleton, Switch, Table, EmptyState, PageHeader, StatCard…),
-  public shell (responsive nav) + portal shell (collapsible sidebar)
-- Self-hosted Inter font (no build-time Google Fonts fetch — faster, reliable builds)
+**Club portal (Sprint 3)**
+- Club-branded, role-aware navigation and dashboard.
+- Squad management for teams and athletes.
+- Match centre supports scheduling fixtures and recording results.
+- Website manager supports draft → review → publish.
+- Settings show organisation, branding, and subscription information.
 
-**Sprint 1 demo flow (Prompt 4)**
-- Platform admin: create sports, organizations (clubs/leagues), staff users (with roles)
-- Platform admin: assign subscription plans, configure feature entitlements, and review the audit log
-- Squad manager: create teams, add athletes, publish athletes via visibility toggles
-- Public: home (featured clubs/fixtures), club directory, club page (branding banner, teams,
-  squad roster with player cards, fixtures & results, news), fixtures, results, news pages
-- Automatic append-only audit events for core platform and tenant mutations
-- Seeded league: Botswana Premier League — Matebele FC, Township Rollers, Gaborone United
+**Analytics (Sprint 4)**
+- ECharts MVP widgets: team performance, player contribution, and form tracker.
+- Club analytics access is role/permission-scoped.
+- Super Admin analytics studio shows definitions, widget, and dashboard statistics.
 
-### 🔧 Reliability and governance shipped
+**Platform administration (Sprint 5)**
+- Organization, subscription/entitlement, user/role, sport, analytics-studio, platform-statistics, and audit-log tooling.
+- Staff users can be created from the Admin portal with a tenant-specific role.
 
-- `500 MIDDLEWARE_INVOCATION_FAILED` — middleware no longer crashes when Supabase env vars are missing
-- Missing or invalid Supabase configuration now renders an actionable `/setup` page instead of a generic Vercel 500
-- `.next` build artifacts removed from git; `.gitignore` added
-- Audit writes are restricted to authenticated users and automatic audit triggers cover core mutations
+### ⚠️ Required before real-tenant testing
 
-## Operational prerequisites
+1. **Do not delete demo records from the app UI or with `CASCADE`.** First use the inspection query and approved transaction in the [tenant-testing cleanup runbook](docs/tenant-testing-cleanup.md) for `matebele-fc` and `township-rollers`.
+2. **Reset/rotate the Super Admin password.** The historical `0019` bootstrap migration includes a known credential and must not be manually re-run. Use the Supabase Dashboard recovery procedure in the runbook.
+3. Apply/confirm all migrations and Vercel environment variables against the intended Supabase project.
+4. Execute the tenant-test acceptance checklist: create a new organisation, create a `CLUB_ADMIN`, sign in at that organisation’s slug, and verify isolation.
 
-These are deployment tasks rather than code blockers:
+## Non-automatic demo policy
 
-- **Apply all migrations to the live Supabase project** (`npx supabase link` + `db push`, or SQL editor)
-- **Set env vars in Vercel** for Production and Preview (see README), then redeploy
-- **Reset the platform owner password** (`owner@ipsportsos.app`) via Supabase dashboard
-- Run the Sprint 1 demo flow end-to-end against the configured project
-
-## Next
-
-Sprint 2 can start with match management, website publishing, and analytics widgets. The Sprint 1 platform foundation and acceptance flow are complete.
+No application feature creates sample organizations. Historical demo seed migrations are not part of the real-tenant test workflow. New tenants must be created explicitly by a Super Admin.
