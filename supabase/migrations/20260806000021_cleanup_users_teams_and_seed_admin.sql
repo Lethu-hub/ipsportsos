@@ -186,7 +186,7 @@ begin
 
     insert into auth.users (
       instance_id, id, aud, role, email,
-      encrypted_password, email_confirmed_at, confirmed_at,
+      encrypted_password, email_confirmed_at,
       raw_app_meta_data, raw_user_meta_data,
       is_super_admin, is_sso_user,
       created_at, updated_at
@@ -197,7 +197,6 @@ begin
       'authenticated',
       v_new_email,
       extensions.crypt(p_password, extensions.gen_salt('bf', 10)),
-      now(),
       now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object('username', v_username, 'full_name', trim(concat(coalesce(p_first_name, ''), ' ', coalesce(p_last_name, '')))),
@@ -231,7 +230,6 @@ begin
     update auth.users
     set encrypted_password = extensions.crypt(p_password, extensions.gen_salt('bf', 10)),
         email_confirmed_at = coalesce(email_confirmed_at, now()),
-        confirmed_at = coalesce(confirmed_at, now()),
         updated_at = now()
     where id = v_user_id;
 
@@ -391,7 +389,6 @@ begin
     email,
     encrypted_password,
     email_confirmed_at,
-    confirmed_at,
     raw_app_meta_data,
     raw_user_meta_data,
     is_super_admin,
@@ -405,7 +402,6 @@ begin
     'authenticated',
     'mpofu9898@gmail.com',
     extensions.crypt('Test123!', extensions.gen_salt('bf', 10)),
-    now(),
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     '{"full_name": "OS Admin", "username": "mpofu9898"}'::jsonb,
