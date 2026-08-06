@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,7 @@ export function AdminLoginForm() {
             </div>
 
             {error ? <FormMessage type="error">{error}</FormMessage> : null}
+            <div className="text-right"><Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">Forgot password?</Link></div>
 
             <Button type="submit" className="w-full" size="lg" loading={loading}>
               Access Admin Console

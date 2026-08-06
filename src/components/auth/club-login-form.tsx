@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,7 @@ export function ClubLoginForm({ club }: ClubLoginFormProps) {
             </div>
 
             {error ? <FormMessage type="error">{error}</FormMessage> : null}
+            <div className="text-right"><Link href="/forgot-password" className="text-sm font-medium hover:underline" style={{ color: primaryColor }}>Forgot password?</Link></div>
 
             <Button
               type="submit"

@@ -77,6 +77,10 @@ export function LoginForm() {
 
             {error ? <FormMessage type="error">{error}</FormMessage> : null}
 
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">Forgot password?</Link>
+            </div>
+
             <Button type="submit" className="w-full" size="lg" loading={loading}>
               Sign in
               {!loading ? <ArrowRight className="h-4 w-4" /> : null}

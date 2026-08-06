@@ -47,7 +47,7 @@ npx supabase db push
 
 ## Tenant-test workflow
 
-1. Reset the Super Admin through **Supabase Dashboard → Authentication → Users → Send password recovery**. Follow the admin-only procedure in the cleanup runbook; never put credentials in source or SQL.
+1. Use **Forgot password?** on any login page to request a secure reset link. In Supabase Auth URL Configuration, add `https://<your-app-domain>/reset-password` (and preview/local equivalents) as an allowed redirect. If email delivery is unavailable, follow the admin-only recovery procedure in the cleanup runbook; never put credentials in source or SQL.
 2. Sign in at `/admin`, create a new organisation, and configure its plan/entitlements.
 3. Create a user in **Admin → Users & Roles**, assign the organisation and `CLUB_ADMIN` role.
 4. Sign out, open `/<organisation-slug>`, and sign in as the club administrator to test the tenant independently.
