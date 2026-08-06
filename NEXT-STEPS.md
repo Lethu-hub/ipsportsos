@@ -1,39 +1,24 @@
 # Next Steps
 
-## Immediate (to go live)
+## Before real tenant testing
 
-1. **Merge the current Sprint 1 branch/PR** into `main` so Vercel deploys the completed platform build.
-2. **Apply all migrations** to Supabase project `ccqruhgsoxcilekpayhr`:
-   ```bash
-   npx supabase link --project-ref ccqruhgsoxcilekpayhr
-   npx supabase db push
-   ```
-   (or paste each file in `supabase/migrations/` into the dashboard SQL editor, in order)
-3. **Set Vercel env vars** (Project → Settings → Environment Variables) for both **Production** and **Preview**, then redeploy:
-   - `NEXT_PUBLIC_SUPABASE_URL=https://ccqruhgsoxcilekpayhr.supabase.co`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_kwlL4zUWmDFm0GH9XeR8fw_zYeF2Rc6`
+1. **Backup and inspect demo tenants.** In Supabase SQL Editor, follow the preflight query in [`docs/tenant-testing-cleanup.md`](docs/tenant-testing-cleanup.md). Verify the only selected slugs are `matebele-fc` and `township-rollers`.
+2. **Remove the two approved demo tenants safely.** Run the documented, child-first SQL transaction as a database administrator. It is intentionally manual and transactional; do not use blanket `DELETE ... CASCADE`.
+3. **Rotate Super Admin access.** Use **Supabase → Authentication → Users → Send password recovery** for the verified Super Admin. The legacy seed password is not safe for tenant testing. Confirm the user retains an active platform-scoped `PLATFORM_OWNER` or `SUPER_ADMIN` membership.
+4. **Create a fresh test tenant in the app.** Sign in at `/admin` → **Organizations**, create the organisation, then configure its plan and entitlements.
+5. **Create the test club administrator.** In `/admin/users`, create a staff user, select the new organisation, and select `CLUB_ADMIN`. Deliver the temporary password securely.
+6. **Verify independent tenant operation.** Sign out, open `/<new-organisation-slug>`, log in as the club admin, and test dashboard, squad, matches, website workflow, settings, permitted analytics, and public club route.
+7. **Review audit activity.** As Super Admin, confirm organization, membership, team, content, and match events in `/admin/audit`.
 
-   If either variable is missing, the app now shows `/setup` with these instructions instead of the generic Vercel server error.
-4. **Reset platform owner password** — Supabase → Authentication → Users → `owner@ipsportsos.app` → Reset password.
+## Operational hardening
 
-## Sprint 1 demo script
+- Confirm Supabase password-recovery email templates and redirect URLs are configured before inviting external tenant staff.
+- Do not re-run historical seed migrations manually. In particular, `20260803000019_seed_admin_superuser.sql` is legacy bootstrap material with a known password.
+- Rotate any Supabase database credentials that may have been previously shared.
+- Establish a backup/export retention policy before onboarding production tenants.
 
-1. Log in as `owner@ipsportsos.app` → Platform Admin → create a sport/league/club (seeded data already exists).
-2. Open **Subscriptions & access**, assign a plan, and enable the features needed by the club.
-3. Create a staff user (e.g. coach@club.com, role COACH, org = a club) — password chosen at creation.
-4. Sign in as the staff user → Squad → create a team, add athletes, toggle **Publish**.
-5. Open the public club page (`/clubs/<club-slug>`) and see the roster with player cards.
-6. Return to **Audit log** and verify the organization, membership, team, and athlete changes.
+## Product follow-up
 
-## Sprint 2 (next)
-
-- Match management (create fixtures, enter results, match events)
-- Website manager (draft → review → publish pages/news, versions)
-- Analytics engine (definitions → widgets → dashboards; ECharts)
-- Organization settings UI (branding colours, subscription display)
-- Player cards: statistics + photos (Supabase Storage buckets: logos, player-images, team-banners, news-images)
-
-## Housekeeping
-
-- Rotate the Supabase **database password** (it was shared in chat).
-- Consider enabling email confirmation policies before opening auth to the public.
+- Add a dedicated, audited Super Admin “send reset link” action backed by a server-side service role only if a product-level reset experience is required; do not expose a service-role key to the browser.
+- Add tenant deactivation/archive workflow and an approval-gated deletion workflow before allowing organisation deletion in the Admin UI.
+- Connect analytics widgets to live tenant data and persist dashboard layouts.

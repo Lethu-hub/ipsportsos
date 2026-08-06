@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-06 — Tenant-testing readiness
+
+### Added
+- Tenant-testing cleanup runbook with a dependency map, preflight count query, and explicit transactional removal procedure for Matebele FC and Township Rollers.
+- Documented admin-only Supabase password-recovery procedure for the Super Admin account.
+- Tenant-test acceptance checklist: create a fresh organisation, create a `CLUB_ADMIN`, sign in through the club slug, and verify tenant isolation.
+
+### Changed
+- README, project status, and next steps now prohibit automatic sample tenant creation and direct operators to the approved cleanup runbook.
+- Legacy Super Admin bootstrap credentials are explicitly treated as compromised and must be rotated before testing.
+
 ## 2026-08-05 — Sprint 1 completion
 
 ### Added
