@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Trophy, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { resolveIdentifierToEmail } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +16,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('next') ?? '/portal';
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -26,10 +27,15 @@ export function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const resolvedEmail = await resolveIdentifierToEmail(supabase, identifier);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: resolvedEmail,
+      password,
+    });
 
     if (signInError) {
-      setError('Invalid email or password. Please try again.');
+      setError('Invalid username/email or password. Please try again.');
       setLoading(false);
       return;
     }
@@ -46,21 +52,21 @@ export function LoginForm() {
             <Trophy className="h-6 w-6" />
           </Link>
           <h1 className="text-2xl font-bold tracking-tight">Portal Login</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to access your club portal.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in with your username or email.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-md">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="login-identifier">Username or Email</Label>
               <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@club.com"
+                id="login-identifier"
+                type="text"
+                autoComplete="username"
+                placeholder="mpofu9898 or coach@club.com"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div className="space-y-2">

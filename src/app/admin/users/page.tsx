@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { UserForm } from '@/components/portal/admin/user-form';
+import { ShieldCheck, Users, Key } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +16,10 @@ export default async function AdminUsersPage() {
   const [usersResult, orgsResult, rolesResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, email, first_name, last_name, status, organization_memberships(role_id, status)')
+      .select('id, email, username, first_name, last_name, status, organization_memberships(role_id, status)')
       .order('email'),
     supabase.from('organizations').select('id, name').eq('status', 'ACTIVE').order('name'),
-    supabase.from('roles').select('name, scope').order('scope').order('name'),
+    supabase.from('roles').select('id, name, scope, description').order('scope').order('name'),
   ]);
 
   const memberships = await supabase
@@ -32,38 +33,49 @@ export default async function AdminUsersPage() {
     membershipByProfile.set(m.profile_id, list);
   }
 
+  const users = usersResult.data ?? [];
+  const roles = rolesResult.data ?? [];
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Users & Roles"
-        description="Create OS admins, staff users, and manage memberships."
+        description="Create OS admins, staff users, and manage access permissions."
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Users</CardTitle>
-            <CardDescription>Everyone with a profile on the platform.</CardDescription>
+            <CardDescription>All accounts with access to the platform ({users.length} total).</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
+                  <TableHead>User / Username</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Memberships</TableHead>
+                  <TableHead>Memberships & Roles</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(usersResult.data ?? []).map((user) => {
+                {users.map((user) => {
                   const userMemberships = membershipByProfile.get(user.id) ?? [];
+                  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
                   return (
                     <TableRow key={user.id}>
                       <TableCell>
                         <p className="font-medium">
-                          {[user.first_name, user.last_name].filter(Boolean).join(' ') || user.email}
+                          {fullName || user.email}
                         </p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground flex items-center gap-2">
+                          <span>{user.email}</span>
+                          {user.username ? (
+                            <span className="font-mono text-[11px] text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                              @{user.username}
+                            </span>
+                          ) : null}
+                        </p>
                       </TableCell>
                       <TableCell>
                         <Badge variant={user.status === 'ACTIVE' ? 'success' : user.status === 'INVITED' ? 'warning' : 'danger'}>
@@ -78,8 +90,9 @@ export default async function AdminUsersPage() {
                             {userMemberships.map((m) => {
                               const orgName = (m.organizations as { name: string } | null)?.name;
                               const roleName = (m.roles as { name: string } | null)?.name;
+                              const isPlatform = !orgName;
                               return (
-                                <Badge key={m.id} variant="outline">
+                                <Badge key={m.id} variant={isPlatform ? 'default' : 'outline'}>
                                   {orgName ?? 'Platform'} · {roleName?.replaceAll('_', ' ')}
                                 </Badge>
                               );
@@ -101,10 +114,50 @@ export default async function AdminUsersPage() {
             <CardDescription>Add an OS Admin or a user with a role in an organization.</CardDescription>
           </CardHeader>
           <CardContent>
-            <UserForm organizations={orgsResult.data ?? []} roles={rolesResult.data ?? []} />
+            <UserForm
+              organizations={orgsResult.data ?? []}
+              roles={roles.map((r) => ({ name: r.name, scope: r.scope }))}
+            />
           </CardContent>
         </Card>
       </div>
+
+      {/* System Roles & Permissions Guide */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5 text-primary" />
+            Software Roles & Permissions Matrix
+          </CardTitle>
+          <CardDescription>
+            Reference guide for platform-level and organization-level authority.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {roles.map((r) => (
+              <div key={r.id} className="rounded-lg border border-border bg-card p-4 shadow-sm space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    {r.scope === 'PLATFORM' ? (
+                      <ShieldCheck className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    {r.name.replaceAll('_', ' ')}
+                  </span>
+                  <Badge variant={r.scope === 'PLATFORM' ? 'default' : 'outline'} className="text-[10px]">
+                    {r.scope.toLowerCase()}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {r.description || 'System defined role'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -42,11 +42,14 @@ npx supabase db push
 
 or run each file in order in the dashboard SQL editor.
 
-Seeds (idempotent):
+Seeds and setup migrations (idempotent):
 
 - `0015` — default roles (PLATFORM_OWNER, SUPER_ADMIN, CLUB_ADMIN, COACH, ANALYST, MEDIA, MEDICAL, SCOUT, PLAYER) + permission catalogue + role→permission mapping
-- `0016` — platform owner (`owner@ipsportsos.app`) — **password is random**; reset it via Supabase → Authentication → Users → Reset password
-- `0017` — demo platform: Football, Botswana Premier League, 2026 Season, three clubs with branding, subscription plans, club sections
+- `0021` — user/demo reset, username login support, and default admin seed:
+  - **Email:** `mpofu9898@gmail.com`
+  - **Username:** `mpofu9898`
+  - **Password:** `Test123!`
+  - **Role:** `PLATFORM_OWNER` (Full platform administration for sports, clubs, software users, permissions, and subscriptions)
 
 ## Sprint 1 (complete)
 

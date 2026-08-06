@@ -22,22 +22,31 @@ export function OrganizationForm({ sports }: OrganizationFormProps) {
   const [type, setType] = useState<'CLUB' | 'LEAGUE' | 'ACADEMY' | 'ASSOCIATION'>('CLUB');
   const [sportId, setSportId] = useState(sports[0]?.id ?? '');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!sportId) {
-      setError('Create a sport first.');
+      setError('Please select or create a sport first.');
       return;
     }
     setError(null);
+    setSuccess(null);
     setLoading(true);
 
     const autoSlug = (slug || name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
     const { data, error: insertError } = await supabase
       .from('organizations')
-      .insert({ name: name.trim(), slug: autoSlug, organization_type: type, sport_id: sportId, status: 'ACTIVE', subscription_status: 'PENDING' })
+      .insert({
+        name: name.trim(),
+        slug: autoSlug,
+        organization_type: type,
+        sport_id: sportId,
+        status: 'ACTIVE',
+        subscription_status: 'PENDING',
+      })
       .select('id')
       .single();
 
@@ -58,6 +67,7 @@ export function OrganizationForm({ sports }: OrganizationFormProps) {
       { organization_id: orgId, section_type: 'stadium', enabled: true, display_order: 5 },
     ]);
 
+    setSuccess(`Organization "${name.trim()}" created successfully. You can now assign subscriptions and add staff.`);
     setName('');
     setSlug('');
     setLoading(false);
@@ -67,14 +77,15 @@ export function OrganizationForm({ sports }: OrganizationFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {error ? <FormMessage type="error">{error}</FormMessage> : null}
+      {success ? <FormMessage type="success">{success}</FormMessage> : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="org-name">Name</Label>
-          <Input id="org-name" placeholder="Matebele FC" value={name} onChange={(e) => setName(e.target.value)} required />
+          <Input id="org-name" placeholder="e.g. Phoenix FC" value={name} onChange={(e) => setName(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="org-slug">URL slug (optional)</Label>
-          <Input id="org-slug" placeholder="matebele-fc" value={slug} onChange={(e) => setSlug(e.target.value)} />
+          <Input id="org-slug" placeholder="e.g. phoenix-fc" value={slug} onChange={(e) => setSlug(e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="org-type">Type</Label>

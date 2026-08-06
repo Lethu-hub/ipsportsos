@@ -32,7 +32,7 @@ export default async function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted-foreground">
               <span className="flex h-2 w-2 rounded-full bg-success" />
-              Beta — One Sport, One League, Three Clubs
+              Digital Operating System for Sports Organisations
             </div>
             <h1 className="text-4xl font-bold tracking-tight md:text-6xl">
               Your home for <span className="text-primary">football intelligence</span>

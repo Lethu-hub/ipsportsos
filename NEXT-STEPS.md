@@ -14,13 +14,17 @@
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_kwlL4zUWmDFm0GH9XeR8fw_zYeF2Rc6`
 
    If either variable is missing, the app now shows `/setup` with these instructions instead of the generic Vercel server error.
-4. **Reset platform owner password** — Supabase → Authentication → Users → `owner@ipsportsos.app` → Reset password.
+4. **Admin Sign-in Credentials** — Log in using username or email:
+   - **Username:** `mpofu9898`
+   - **Email:** `mpofu9898@gmail.com`
+   - **Password:** `Test123!`
 
-## Sprint 1 demo script
+## Platform Administration flow
 
-1. Log in as `owner@ipsportsos.app` → Platform Admin → create a sport/league/club (seeded data already exists).
-2. Open **Subscriptions & access**, assign a plan, and enable the features needed by the club.
-3. Create a staff user (e.g. coach@club.com, role COACH, org = a club) — password chosen at creation.
+1. Log in with username `mpofu9898` and password `Test123!` at `/admin` (or `/login`).
+2. Go to **Organizations** (`/admin/organizations`) to create clubs, leagues, or academies.
+3. Go to **Subscriptions & access** (`/admin/subscriptions`) to assign plans and configure entitlements for clubs.
+4. Go to **Users & Roles** (`/admin/users`) to create software users (with email, username, role, and club assignment).
 4. Sign in as the staff user → Squad → create a team, add athletes, toggle **Publish**.
 5. Open the public club page (`/clubs/<club-slug>`) and see the roster with player cards.
 6. Return to **Audit log** and verify the organization, membership, team, and athlete changes.

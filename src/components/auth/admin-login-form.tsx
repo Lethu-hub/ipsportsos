@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { resolveIdentifierToEmail } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,7 +12,7 @@ import { FormMessage } from '@/components/ui/form-message';
 
 export function AdminLoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,10 +23,15 @@ export function AdminLoginForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const resolvedEmail = await resolveIdentifierToEmail(supabase, identifier);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: resolvedEmail,
+      password,
+    });
 
     if (signInError) {
-      setError('Invalid admin credentials. Please try again.');
+      setError('Invalid admin credentials. Please check your username/email and password.');
       setLoading(false);
       return;
     }
@@ -41,21 +47,21 @@ export function AdminLoginForm() {
             <ShieldCheck className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Admin Portal</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to manage the operating system.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in with your admin username or email.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-md">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="admin-email">Admin Email</Label>
+              <Label htmlFor="admin-identifier">Username or Email</Label>
               <Input
-                id="admin-email"
-                type="email"
-                autoComplete="email"
-                placeholder="mpofu9898@gmail.com"
+                id="admin-identifier"
+                type="text"
+                autoComplete="username"
+                placeholder="mpofu9898 or mpofu9898@gmail.com"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div className="space-y-2">

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { resolveIdentifierToEmail } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +23,7 @@ interface ClubLoginFormProps {
 
 export function ClubLoginForm({ club }: ClubLoginFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,10 +34,15 @@ export function ClubLoginForm({ club }: ClubLoginFormProps) {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const resolvedEmail = await resolveIdentifierToEmail(supabase, identifier);
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: resolvedEmail,
+      password,
+    });
 
     if (signInError) {
-      setError('Invalid email or password for this club portal.');
+      setError('Invalid username/email or password for this club portal.');
       setLoading(false);
       return;
     }
@@ -63,15 +69,15 @@ export function ClubLoginForm({ club }: ClubLoginFormProps) {
         <form onSubmit={handleSubmit} className="rounded-xl border border-border bg-card p-8 shadow-md">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="club-email">Staff Email</Label>
+              <Label htmlFor="club-identifier">Username or Email</Label>
               <Input
-                id="club-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@club.com"
+                id="club-identifier"
+                type="text"
+                autoComplete="username"
+                placeholder="you@club.com or username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div className="space-y-2">

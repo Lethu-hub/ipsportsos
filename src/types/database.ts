@@ -43,6 +43,7 @@ export type Profile = {
   id: string;
   auth_user_id: string;
   email: string;
+  username?: string | null;
   first_name: string | null;
   last_name: string | null;
   avatar_url: string | null;
@@ -713,8 +714,15 @@ export type Database = {
           p_password: string;
           p_first_name?: string | null;
           p_last_name?: string | null;
+          p_username?: string | null;
         };
         Returns: string;
+      };
+      resolve_login_email: {
+        Args: {
+          p_identifier: string;
+        };
+        Returns: string | null;
       };
       get_my_access: {
         Args: Record<string, never>;

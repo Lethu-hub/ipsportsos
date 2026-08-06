@@ -46,8 +46,9 @@ These are deployment tasks rather than code blockers:
 
 - **Apply all migrations to the live Supabase project** (`npx supabase link` + `db push`, or SQL editor)
 - **Set env vars in Vercel** for Production and Preview (see README), then redeploy
-- **Reset the platform owner password** (`owner@ipsportsos.app`) via Supabase dashboard
-- Run the Sprint 1 demo flow end-to-end against the configured project
+- **Default admin login** (`mpofu9898@gmail.com` / `mpofu9898`, password: `Test123!`) created via migration `0021`
+- **Username or email sign-in** enabled across Admin Portal, Staff Portal, and Club login forms
+- Demo platform teams and users cleaned up for a fresh system state
 
 ## Next
 
