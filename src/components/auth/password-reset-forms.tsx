@@ -13,22 +13,24 @@ import { Label } from '@/components/ui/label';
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [deliveryError, setDeliveryError] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    setLoading(true);
+    setLoading(true); setDeliveryError(false);
     const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    // Deliberately do not reveal whether an account exists.
-    setSent(true);
+    // Successful requests remain non-enumerating. A provider/service failure is
+    // safe to surface because it is independent of whether the email exists.
+    if (error) setDeliveryError(true); else setSent(true);
     setLoading(false);
   }
 
   return <AuthCard title="Reset your password" description="Enter your email and we’ll send a secure reset link.">
-    {sent ? <FormMessage type="success">If an account exists for this email, a password-reset link is on its way. Check your inbox and spam folder.</FormMessage> : <form onSubmit={submit} className="space-y-4"><div className="space-y-2"><Label htmlFor="reset-email">Email</Label><Input id="reset-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div><Button className="w-full" loading={loading}>Send reset link</Button></form>}
+    {sent ? <FormMessage type="success">If an account exists for this email, a password-reset link is on its way. Check your inbox and spam folder.</FormMessage> : <form onSubmit={submit} className="space-y-4"><div className="space-y-2"><Label htmlFor="reset-email">Email</Label><Input id="reset-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>{deliveryError && <FormMessage type="error">Password recovery is temporarily unavailable. Please contact a platform administrator or try again later.</FormMessage>}<Button className="w-full" loading={loading}>Send reset link</Button></form>}
     <Link href="/login" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"><ArrowLeft className="h-4 w-4" /> Back to sign in</Link>
   </AuthCard>;
 }
