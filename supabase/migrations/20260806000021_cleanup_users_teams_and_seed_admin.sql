@@ -3,8 +3,8 @@
 --                      support username login, and seed default admin
 -- ============================================================
 -- 1. Adds username column and index to profiles, plus resolution RPC.
--- 2. Purges all existing users (auth.users, profiles, memberships).
--- 3. Purges all demo teams, demo clubs, demo matches, demo athletes,
+-- 2. Safely purges all existing users (auth.users, profiles, memberships).
+-- 3. Safely purges all demo teams, demo clubs, demo matches, demo athletes,
 --    demo competitions, and demo website pages from the platform.
 -- 4. Creates default admin user:
 --      email:    mpofu9898@gmail.com
@@ -94,6 +94,9 @@ $$;
 
 revoke all on function public.resolve_login_email(text) from public;
 grant execute on function public.resolve_login_email(text) to anon, authenticated;
+
+-- Drop old 6-param signature if it exists
+drop function if exists public.create_staff_user(uuid, text, text, text, text, text);
 
 -- Enhanced create_staff_user to accept optional username
 create or replace function public.create_staff_user(
@@ -225,10 +228,38 @@ revoke all on function public.create_staff_user(uuid, text, text, text, text, te
 grant execute on function public.create_staff_user(uuid, text, text, text, text, text, text) to authenticated;
 
 -- ------------------------------------------------------------
--- Data reset & default admin creation
+-- Safe data reset & default admin creation
 -- ------------------------------------------------------------
 do $$
 declare
+  v_table        text;
+  v_tables       text[] := array[
+    'public.match_events',
+    'public.matches',
+    'public.athlete_statistics',
+    'public.athlete_visibility',
+    'public.athlete_team_history',
+    'public.athletes',
+    'public.competition_participants',
+    'public.seasons',
+    'public.competitions',
+    'public.dashboard_widgets',
+    'public.dashboards',
+    'public.analytics_widgets',
+    'public.analytics_definitions',
+    'public.website_page_versions',
+    'public.website_pages',
+    'public.news_items',
+    'public.club_page_sections',
+    'public.feature_entitlements',
+    'public.organization_subscriptions',
+    'public.organization_branding',
+    'public.teams',
+    'public.organization_memberships',
+    'public.organizations',
+    'public.audit_logs',
+    'public.profiles'
+  ];
   v_user_id      uuid;
   v_profile_id   uuid;
   v_owner_role   uuid;
@@ -237,41 +268,15 @@ declare
 begin
   -- ----------------------------------------------------------
   -- Step 1 & 2: Wipe all demo data, demo teams, and existing users
+  -- Safely deletes from each existing table in dependency order
   -- ----------------------------------------------------------
-  delete from public.match_events;
-  delete from public.matches;
+  foreach v_table in array v_tables loop
+    if to_regclass(v_table) is not null then
+      execute format('delete from %s', v_table);
+    end if;
+  end loop;
 
-  delete from public.athlete_statistics;
-  delete from public.athlete_visibility;
-  delete from public.athlete_team_history;
-  delete from public.athletes;
-
-  delete from public.competition_participants;
-  delete from public.seasons;
-  delete from public.competitions;
-
-  delete from public.dashboard_widgets;
-  delete from public.dashboards;
-  delete from public.analytics_widgets;
-  delete from public.widget_templates;
-
-  delete from public.website_page_versions;
-  delete from public.website_pages;
-  delete from public.news_items;
-
-  delete from public.club_page_sections;
-  delete from public.feature_entitlements;
-  delete from public.organization_subscriptions;
-  delete from public.organization_branding;
-
-  delete from public.teams;
-
-  delete from public.organization_memberships;
-  delete from public.organizations;
-
-  delete from public.audit_logs;
-
-  delete from public.profiles;
+  -- Delete auth users
   delete from auth.users;
 
   -- ----------------------------------------------------------
