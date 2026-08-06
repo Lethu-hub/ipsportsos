@@ -3,7 +3,7 @@
 --                      support username login, and seed default admin
 -- ============================================================
 -- 1. Adds username column and index to profiles, plus resolution RPC.
--- 2. Safely purges all existing users (auth.users, profiles, memberships).
+-- 2. Safely purges all existing users (auth.identities, auth.users, profiles).
 -- 3. Safely purges all demo teams, demo clubs, demo matches, demo athletes,
 --    demo competitions, and demo website pages from the platform.
 -- 4. Creates default admin user:
@@ -30,7 +30,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, extensions
 as $$
 declare
   v_username text;
@@ -54,7 +54,7 @@ create or replace function public.resolve_login_email(p_identifier text)
 returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, extensions
 as $$
 declare
   v_email text;
@@ -88,6 +88,16 @@ begin
     limit 1;
   end if;
 
+  -- Fallback: match in auth.users directly
+  if v_email is null then
+    select email into v_email
+    from auth.users
+    where lower(email) = v_clean
+       or lower(split_part(email, '@', 1)) = v_clean
+       or lower(raw_user_meta_data->>'username') = v_clean
+    limit 1;
+  end if;
+
   return v_email;
 end;
 $$;
@@ -98,7 +108,7 @@ grant execute on function public.resolve_login_email(text) to anon, authenticate
 -- Drop old 6-param signature if it exists
 drop function if exists public.create_staff_user(uuid, text, text, text, text, text);
 
--- Enhanced create_staff_user to accept optional username
+-- Enhanced create_staff_user to accept optional username and create auth identity
 create or replace function public.create_staff_user(
   p_organization_id uuid,
   p_role_name       text,
@@ -111,7 +121,7 @@ create or replace function public.create_staff_user(
 returns uuid
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, extensions
 as $$
 declare
   v_caller       uuid := public.current_profile_id();
@@ -172,25 +182,79 @@ begin
   limit 1;
 
   if v_user_id is null then
+    v_user_id := gen_random_uuid();
+
     insert into auth.users (
       instance_id, id, aud, role, email,
-      encrypted_password, email_confirmed_at,
+      encrypted_password, email_confirmed_at, confirmed_at,
       raw_app_meta_data, raw_user_meta_data,
+      is_super_admin, is_sso_user,
       created_at, updated_at
     ) values (
       '00000000-0000-0000-0000-000000000000',
-      gen_random_uuid(),
+      v_user_id,
       'authenticated',
       'authenticated',
       v_new_email,
-      crypt(p_password, gen_salt('bf')),
+      extensions.crypt(p_password, extensions.gen_salt('bf', 10)),
       now(),
-      '{"provider":"email","providers":["email"]}',
+      now(),
+      '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object('username', v_username, 'full_name', trim(concat(coalesce(p_first_name, ''), ' ', coalesce(p_last_name, '')))),
+      false,
+      false,
+      now(),
+      now()
+    );
+
+    insert into auth.identities (
+      id,
+      user_id,
+      identity_data,
+      provider,
+      provider_id,
+      last_sign_in_at,
+      created_at,
+      updated_at
+    ) values (
+      v_user_id::text,
+      v_user_id,
+      jsonb_build_object('sub', v_user_id::text, 'email', v_new_email, 'email_verified', true),
+      'email',
+      v_user_id::text,
+      now(),
       now(),
       now()
     )
-    returning id into v_user_id;
+    on conflict do nothing;
+  else
+    update auth.users
+    set encrypted_password = extensions.crypt(p_password, extensions.gen_salt('bf', 10)),
+        email_confirmed_at = coalesce(email_confirmed_at, now()),
+        confirmed_at = coalesce(confirmed_at, now()),
+        updated_at = now()
+    where id = v_user_id;
+
+    insert into auth.identities (
+      id,
+      user_id,
+      identity_data,
+      provider,
+      provider_id,
+      last_sign_in_at,
+      created_at,
+      updated_at
+    ) values (
+      v_user_id::text,
+      v_user_id,
+      jsonb_build_object('sub', v_user_id::text, 'email', v_new_email, 'email_verified', true),
+      'email',
+      v_user_id::text,
+      now(),
+      now(),
+      now()
+    )
+    on conflict do nothing;
   end if;
 
   -- Profile
@@ -276,7 +340,8 @@ begin
     end if;
   end loop;
 
-  -- Delete auth users
+  -- Delete auth identities and auth users
+  delete from auth.identities;
   delete from auth.users;
 
   -- ----------------------------------------------------------
@@ -316,6 +381,8 @@ begin
     raise exception 'PLATFORM_OWNER role not found — ensure roles are seeded';
   end if;
 
+  v_user_id := gen_random_uuid();
+
   insert into auth.users (
     instance_id,
     id,
@@ -324,24 +391,51 @@ begin
     email,
     encrypted_password,
     email_confirmed_at,
+    confirmed_at,
     raw_app_meta_data,
     raw_user_meta_data,
+    is_super_admin,
+    is_sso_user,
     created_at,
     updated_at
   ) values (
     '00000000-0000-0000-0000-000000000000',
-    gen_random_uuid(),
+    v_user_id,
     'authenticated',
     'authenticated',
     'mpofu9898@gmail.com',
-    crypt('Test123!', gen_salt('bf')),
+    extensions.crypt('Test123!', extensions.gen_salt('bf', 10)),
     now(),
-    '{"provider":"email","providers":["email"]}',
-    '{"full_name": "OS Admin", "username": "mpofu9898"}',
+    now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    '{"full_name": "OS Admin", "username": "mpofu9898"}'::jsonb,
+    false,
+    false,
+    now(),
+    now()
+  );
+
+  -- Insert email identity into auth.identities
+  insert into auth.identities (
+    id,
+    user_id,
+    identity_data,
+    provider,
+    provider_id,
+    last_sign_in_at,
+    created_at,
+    updated_at
+  ) values (
+    v_user_id::text,
+    v_user_id,
+    jsonb_build_object('sub', v_user_id::text, 'email', 'mpofu9898@gmail.com', 'email_verified', true),
+    'email',
+    v_user_id::text,
+    now(),
     now(),
     now()
   )
-  returning id into v_user_id;
+  on conflict do nothing;
 
   -- Profile
   insert into public.profiles (id, auth_user_id, email, username, first_name, last_name, status)
