@@ -19,5 +19,10 @@ export async function resolveIdentifierToEmail(
     // Fallback if RPC is unavailable
   }
 
+  // Built-in fallback for admin username
+  if (trimmed.toLowerCase() === 'mpofu9898') {
+    return 'mpofu9898@gmail.com';
+  }
+
   return trimmed;
 }

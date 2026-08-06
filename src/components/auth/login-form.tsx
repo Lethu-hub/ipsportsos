@@ -35,7 +35,7 @@ export function LoginForm() {
     });
 
     if (signInError) {
-      setError('Invalid username/email or password. Please try again.');
+      setError(signInError.message || 'Invalid username/email or password. Please try again.');
       setLoading(false);
       return;
     }

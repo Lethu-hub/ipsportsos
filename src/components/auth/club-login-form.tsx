@@ -42,7 +42,7 @@ export function ClubLoginForm({ club }: ClubLoginFormProps) {
     });
 
     if (signInError) {
-      setError('Invalid username/email or password for this club portal.');
+      setError(signInError.message || 'Invalid username/email or password for this club portal.');
       setLoading(false);
       return;
     }

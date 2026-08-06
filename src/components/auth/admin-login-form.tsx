@@ -31,7 +31,7 @@ export function AdminLoginForm() {
     });
 
     if (signInError) {
-      setError('Invalid admin credentials. Please check your username/email and password.');
+      setError(signInError.message || 'Invalid admin credentials. Please check your username/email and password.');
       setLoading(false);
       return;
     }
