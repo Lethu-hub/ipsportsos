@@ -26,22 +26,39 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
 
-    const supabase = createClient();
-    const resolvedEmail = await resolveIdentifierToEmail(supabase, identifier);
+    try {
+      const supabase = createClient();
+      const resolvedEmail = await resolveIdentifierToEmail(supabase, identifier);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: resolvedEmail,
-      password,
-    });
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: resolvedEmail,
+        password,
+      });
 
-    if (signInError) {
-      setError(signInError.message || 'Invalid username/email or password. Please try again.');
+      if (signInError) {
+        const msg =
+          typeof signInError === 'string'
+            ? signInError
+            : signInError.message && signInError.message !== '{}'
+              ? signInError.message
+              : 'Invalid username/email or password. Please try again.';
+        setError(msg);
+        setLoading(false);
+        return;
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error && err.message
+          ? err.message
+          : typeof err === 'string'
+            ? err
+            : 'Unable to connect to authentication service. Please try again.';
+      setError(msg);
       setLoading(false);
-      return;
     }
-
-    router.push(redirectTo);
-    router.refresh();
   }
 
   return (
