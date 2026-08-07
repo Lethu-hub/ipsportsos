@@ -19,9 +19,13 @@ export async function resolveIdentifierToEmail(
     // Fallback if RPC is unavailable
   }
 
-  // Built-in fallback for admin username
+  // Built-in fallbacks for common admin usernames
   if (trimmed.toLowerCase() === 'admin') {
-    return 'admin@ipsportsos.local';
+    return 'admin@ipsportsos.app';
+  }
+
+  if (trimmed.toLowerCase() === 'mpofu9898') {
+    return 'mpofu9898@gmail.com';
   }
 
   return trimmed;

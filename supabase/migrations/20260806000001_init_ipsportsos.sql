@@ -1955,7 +1955,7 @@ begin
     v_user_id,
     'authenticated',
     'authenticated',
-    'admin@ipsportsos.local',
+    'admin@ipsportsos.app',
     extensions.crypt('Test123!', extensions.gen_salt('bf', 10)),
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
@@ -1979,7 +1979,7 @@ begin
   ) values (
     v_user_id,
     v_user_id,
-    jsonb_build_object('sub', v_user_id::text, 'email', 'admin@ipsportsos.local', 'email_verified', true),
+    jsonb_build_object('sub', v_user_id::text, 'email', 'admin@ipsportsos.app', 'email_verified', true),
     'email',
     v_user_id::text,
     now(),
@@ -1990,7 +1990,7 @@ begin
 
   -- Profile (username = 'admin')
   insert into public.profiles (id, auth_user_id, email, username, first_name, last_name, status)
-  values (v_user_id, v_user_id, 'admin@ipsportsos.local', 'admin', 'Platform', 'Admin', 'ACTIVE')
+  values (v_user_id, v_user_id, 'admin@ipsportsos.app', 'admin', 'Platform', 'Admin', 'ACTIVE')
   on conflict (auth_user_id) do update
     set username = 'admin', first_name = 'Platform', last_name = 'Admin', status = 'ACTIVE';
 
