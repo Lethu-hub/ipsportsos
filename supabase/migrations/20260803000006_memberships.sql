@@ -1,5 +1,5 @@
 -- ============================================================
--- IP Sports OS — 0006: organization_memberships
+-- IP Sports OS — 0006: organization_memberships & cross-profile policies
 -- ============================================================
 -- NOTE: organization_id is nullable (per schema spec) so that
 -- PLATFORM-scoped roles (PLATFORM_OWNER, SUPER_ADMIN) can hold
@@ -76,3 +76,43 @@ create policy "organization_memberships_delete" on public.organization_membershi
     public.is_platform_admin()
     or public.has_permission(organization_id, 'users:delete')
   );
+
+-- ------------------------------------------------------------
+-- Cross-table policies on public.profiles (now that organization_memberships exists)
+-- ------------------------------------------------------------
+
+-- Members of an organization may read the profiles of their co-members.
+create policy "profiles_member_read" on public.profiles
+  for select
+  to authenticated
+  using (exists (
+    select 1
+    from public.organization_memberships m
+    where m.profile_id = public.current_profile_id()
+      and m.status = 'ACTIVE'
+      and exists (
+        select 1 from public.organization_memberships mine
+        where mine.organization_id = m.organization_id
+          and mine.profile_id = profiles.id
+      )
+  ));
+
+-- Users with users:update manage profiles of their organization.
+create policy "profiles_member_update" on public.profiles
+  for update
+  to authenticated
+  using (exists (
+    select 1
+    from public.organization_memberships m
+    join public.role_permissions rp on rp.role_id = m.role_id
+    join public.permissions p on p.id = rp.permission_id
+    where m.profile_id = public.current_profile_id()
+      and m.status = 'ACTIVE'
+      and p.key = 'users:update'
+      and exists (
+        select 1 from public.organization_memberships target
+        where target.organization_id = m.organization_id
+          and target.profile_id = profiles.id
+      )
+  ))
+  with check (true);

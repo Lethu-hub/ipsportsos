@@ -9,6 +9,7 @@ create table if not exists public.profiles (
   id           uuid primary key default gen_random_uuid(),
   auth_user_id uuid not null unique references auth.users(id) on delete cascade,
   email        text not null unique,
+  username     text unique,
   first_name   text,
   last_name    text,
   avatar_url   text,
@@ -18,6 +19,7 @@ create table if not exists public.profiles (
 );
 
 create index profiles_status_idx on public.profiles(status);
+create index profiles_username_idx on public.profiles(lower(username));
 
 create trigger profiles_set_updated_at
   before update on public.profiles
@@ -28,12 +30,21 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, auth, extensions
 as $$
+declare
+  v_username text;
 begin
-  insert into public.profiles (id, auth_user_id, email)
-  values (new.id, new.id, coalesce(new.email, ''))
-  on conflict (auth_user_id) do nothing;
+  v_username := lower(coalesce(
+    new.raw_user_meta_data->>'username',
+    split_part(coalesce(new.email, ''), '@', 1)
+  ));
+
+  insert into public.profiles (id, auth_user_id, email, username)
+  values (new.id, new.id, coalesce(new.email, ''), nullif(v_username, ''))
+  on conflict (auth_user_id) do update
+    set email = excluded.email,
+        username = coalesce(public.profiles.username, excluded.username);
   return new;
 end;
 $$;
@@ -58,45 +69,12 @@ create policy "profiles_own_update" on public.profiles
   using (id = auth.uid())
   with check (id = auth.uid() and status <> 'DISABLED');
 
--- Members of an organization may read the profiles of their co-members.
-create policy "profiles_member_read" on public.profiles
-  for select
-  to authenticated
-  using (exists (
-    select 1
-    from public.organization_memberships m
-    where m.profile_id = public.current_profile_id()
-      and m.status = 'ACTIVE'
-      and exists (
-        select 1 from public.organization_memberships mine
-        where mine.organization_id = m.organization_id
-          and mine.profile_id = profiles.id
-      )
-  ));
-
--- Users with users:update manage profiles of their organization.
-create policy "profiles_member_update" on public.profiles
-  for update
-  to authenticated
-  using (exists (
-    select 1
-    from public.organization_memberships m
-    join public.role_permissions rp on rp.role_id = m.role_id
-    join public.permissions p on p.id = rp.permission_id
-    where m.profile_id = public.current_profile_id()
-      and m.status = 'ACTIVE'
-      and p.key = 'users:update'
-      and exists (
-        select 1 from public.organization_memberships target
-        where target.organization_id = m.organization_id
-          and target.profile_id = profiles.id
-      )
-  ))
-  with check (true);
-
 -- Platform administrators manage all profiles.
 create policy "profiles_platform_manage" on public.profiles
   for all
   to authenticated
   using (public.is_platform_admin())
   with check (public.is_platform_admin());
+
+-- Note: profiles_member_read and profiles_member_update policies are defined
+-- in 0006_memberships.sql after organization_memberships table is created.

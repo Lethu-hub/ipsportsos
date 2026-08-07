@@ -1,5 +1,5 @@
 -- ============================================================
--- IP Sports OS — 0007: competitions, competition_participants, seasons
+-- IP Sports OS — 0007: competitions, seasons, competition_participants
 -- ============================================================
 
 -- ------------------------------------------------------------
@@ -47,6 +47,45 @@ create policy "competitions_platform_manage" on public.competitions
   with check (public.is_platform_admin());
 
 -- ------------------------------------------------------------
+-- seasons (created before competition_participants)
+-- ------------------------------------------------------------
+create table if not exists public.seasons (
+  id                uuid primary key default gen_random_uuid(),
+  organization_id   uuid not null references public.organizations(id),
+  competition_id    uuid not null references public.competitions(id) on delete cascade,
+  name              text not null,
+  start_date        date,
+  end_date          date,
+  is_active         boolean not null default false,
+  created_at        timestamptz not null default now()
+);
+
+create index seasons_competition_id_idx on public.seasons(competition_id);
+create index seasons_org_idx on public.seasons(organization_id);
+
+alter table public.seasons enable row level security;
+
+-- Seasons are public.
+create policy "seasons_public_read" on public.seasons
+  for select
+  to anon, authenticated
+  using (true);
+
+-- Organization members manage seasons of their organization.
+create policy "seasons_member_manage" on public.seasons
+  for all
+  to authenticated
+  using (public.can(organization_id, 'matches:create'))
+  with check (public.can(organization_id, 'matches:create'));
+
+-- Platform administrators manage all seasons.
+create policy "seasons_platform_manage" on public.seasons
+  for all
+  to authenticated
+  using (public.is_platform_admin())
+  with check (public.is_platform_admin());
+
+-- ------------------------------------------------------------
 -- competition_participants (team ↔ competition ↔ season)
 -- ------------------------------------------------------------
 create table if not exists public.competition_participants (
@@ -84,45 +123,6 @@ create policy "competition_participants_member_manage" on public.competition_par
 
 -- Platform administrators manage all participation.
 create policy "competition_participants_platform_manage" on public.competition_participants
-  for all
-  to authenticated
-  using (public.is_platform_admin())
-  with check (public.is_platform_admin());
-
--- ------------------------------------------------------------
--- seasons
--- ------------------------------------------------------------
-create table if not exists public.seasons (
-  id                uuid primary key default gen_random_uuid(),
-  organization_id   uuid not null references public.organizations(id),
-  competition_id    uuid not null references public.competitions(id) on delete cascade,
-  name              text not null,
-  start_date        date,
-  end_date          date,
-  is_active         boolean not null default false,
-  created_at        timestamptz not null default now()
-);
-
-create index seasons_competition_id_idx on public.seasons(competition_id);
-create index seasons_org_idx on public.seasons(organization_id);
-
-alter table public.seasons enable row level security;
-
--- Seasons are public.
-create policy "seasons_public_read" on public.seasons
-  for select
-  to anon, authenticated
-  using (true);
-
--- Organization members manage seasons of their organization.
-create policy "seasons_member_manage" on public.seasons
-  for all
-  to authenticated
-  using (public.can(organization_id, 'matches:create'))
-  with check (public.can(organization_id, 'matches:create'));
-
--- Platform administrators manage all seasons.
-create policy "seasons_platform_manage" on public.seasons
   for all
   to authenticated
   using (public.is_platform_admin())
